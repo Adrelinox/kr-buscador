@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KR Buscador de Oportunidades</title>
+<meta name="theme-color" content="#0F2D52">
+<meta name="description" content="Buscador de oportunidades de ingreso con análisis Kairzen Raycer.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{
+  --navy:#0F2D52; --teal:#00A898; --teal2:#007A72; --gold:#C9A052; --gold2:#8B6914;
+  --bg:#F4F7FA; --card:#FFFFFF; --ink:#1E2833; --muted:#5B6B7C; --line:#DCE3EA;
+  --ok:#1F7A4D; --okbg:#E6F4EC; --warn:#8B6914; --warnbg:#FBF4E3; --bad:#B23B3B; --badbg:#FBE7E7;
+  --info:#0F2D52; --infobg:#EBF0F7; --chip:#E0F5F3;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0B1522; --card:#132233; --ink:#E6EDF4; --muted:#9AAABB; --line:#24384D;
+    --okbg:#15372A; --warnbg:#3A2F14; --badbg:#3E1C1C; --infobg:#18304C; --chip:#123B3A;
+    --ok:#5FD39B; --warn:#E3C07A; --bad:#F08A8A; --info:#9FC3EE;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1522; --card:#132233; --ink:#E6EDF4; --muted:#9AAABB; --line:#24384D;
+  --okbg:#15372A; --warnbg:#3A2F14; --badbg:#3E1C1C; --infobg:#18304C; --chip:#123B3A;
+  --ok:#5FD39B; --warn:#E3C07A; --bad:#F08A8A; --info:#9FC3EE;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header.top{position:sticky;top:0;z-index:5;background:var(--navy);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 16px 10px}
+header.top .brand{font-weight:800;letter-spacing:.3px;font-size:16px}
+header.top .brand b{color:var(--gold)}
+header.top .sub{font-size:12px;color:#BFD0E3}
+main{padding:14px 16px calc(84px + env(safe-area-inset-bottom));max-width:720px;margin:0 auto}
+section.view{display:none} section.view.on{display:block}
+h2{font-size:18px;margin:6px 0 10px;color:var(--ink)}
+h3{font-size:15px;margin:14px 0 8px}
+p.note{color:var(--muted);font-size:13px;margin:6px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 10px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input[type=text],input[type=number],select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
+textarea{min-height:70px}
+button{font:inherit;border:0;border-radius:10px;padding:11px 14px;cursor:pointer}
+.btn{background:var(--teal);color:#fff;font-weight:700}
+.btn.gold{background:var(--gold);color:#1E2833}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn.small{padding:7px 10px;font-size:13px}
+.btn:disabled{opacity:.5}
+.chips{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;margin:8px -4px;padding:0 4px 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto}
+.chip{background:var(--chip);color:var(--teal2);border:0;border-radius:999px;padding:6px 10px;font-size:13px}
+:root[data-theme="dark"] .chip{color:#7FE3D6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip{color:#7FE3D6}}
+.src{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;margin:6px 0}
+.src span{padding:3px 8px;border-radius:999px;background:var(--infobg);color:var(--info)}
+.src span.ok{background:var(--okbg);color:var(--ok)} .src span.err{background:var(--badbg);color:var(--bad)}
+.job h4{margin:0 0 2px;font-size:15px;line-height:1.3}
+.job .meta{color:var(--muted);font-size:12.5px}
+.badge{display:inline-block;font-size:12px;font-weight:700;border-radius:8px;padding:3px 8px}
+.v-ok{background:var(--okbg);color:var(--ok)} .v-warn{background:var(--warnbg);color:var(--warn)}
+.v-bad{background:var(--badbg);color:var(--bad)} .v-far{background:var(--infobg);color:var(--info)}
+.idx{display:flex;gap:10px;margin:8px 0}
+.idx > div{flex:1;background:var(--bg);border-radius:8px;padding:6px 8px}
+.idx small{display:block;color:var(--muted);font-size:11px}
+.idx strong{font-size:17px}
+.bar{height:6px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;background:var(--teal)}
+.pay{font-size:13px;margin:6px 0;color:var(--ink)}
+.keys{list-style:none;padding:0;margin:8px 0}
+.keys li{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;padding:5px 0;border-top:1px dashed var(--line)}
+.dot{flex:0 0 10px;height:10px;border-radius:50%;margin-top:5px}
+.d-tiene{background:var(--ok)} .d-alcanzable{background:var(--gold)} .d-verificar{background:#8FA3B8} .d-noviable{background:var(--bad)}
+.keys em{color:var(--muted);font-style:normal;font-size:12.5px;display:block}
+.step{background:var(--infobg);border-left:3px solid var(--teal);padding:8px 10px;border-radius:6px;font-size:13.5px;margin:8px 0}
+details summary{cursor:pointer;color:var(--teal2);font-weight:700;font-size:13.5px}
+:root[data-theme="dark"] details summary{color:#7FE3D6}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) details summary{color:#7FE3D6}}
+.links a{display:inline-block;margin:4px 6px 4px 0;padding:7px 10px;border-radius:8px;background:var(--card);border:1px solid var(--line);color:var(--ink);text-decoration:none;font-size:13px}
+nav.bottom{position:fixed;left:0;right:0;bottom:0;z-index:6;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav.bottom button{flex:1;background:none;color:var(--muted);padding:9px 2px 8px;font-size:11.5px;border-radius:0}
+nav.bottom button .ic{display:block;font-size:19px;line-height:1.1}
+nav.bottom button.on{color:var(--teal);font-weight:700}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+label.ck{display:flex;gap:8px;align-items:center;font-size:14px;padding:6px 8px;border-radius:8px;background:var(--bg)}
+label.ck input{width:18px;height:18px;accent-color:var(--teal)}
+.empty{text-align:center;color:var(--muted);padding:26px 10px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 14px;border-radius:10px;font-size:14px;z-index:9;display:none;max-width:90%}
+.kmap li{display:block}
+.kmap .n{font-weight:800;color:var(--teal2)}
+.muted{color:var(--muted)}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-right-color:transparent;border-radius:50%;animation:s 0.8s linear infinite;vertical-align:-2px}
+@keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">KAIRZEN <b>RAYCER</b> · Buscador</div>
+  <div class="sub" id="subline">Encuentra la oportunidad · nombra la llave · ataca</div>
+</header>
+<main>
+
+<!-- BUSCAR -->
+<section class="view on" id="v-buscar">
+  <div class="card">
+    <div class="row" style="flex-wrap:nowrap">
+      <input type="text" id="q" placeholder="Ej.: python, chatbot, customer support, ai trainer" autocomplete="off" enterkeyhint="search">
+      <button class="btn" id="go" aria-label="Buscar">Buscar</button>
+    </div>
+    <div class="chips" id="sugg"></div>
+    <div class="row">
+      <select id="fVer" style="flex:1">
+        <option value="all">Todas las ofertas</option>
+        <option value="ok">Solo “Aplica hoy”</option>
+        <option value="apt">Puedo aplicar desde mi país</option>
+      </select>
+      <select id="fSrc" style="flex:1">
+        <option value="all">Todas las fuentes</option>
+      </select>
+    </div>
+    <div class="src" id="srcStatus"></div>
+    <p class="note" id="rates"></p>
+  </div>
+  <div id="results"><div class="empty">Escribe qué sabes hacer o qué buscas y pulsa <b>Buscar</b>.<br>La app busca en varias bolsas de trabajo a la vez y analiza cada oferta con Kairzen Raycer.</div></div>
+  <div class="card">
+    <h3 style="margin-top:0">Buscar también en estas plataformas</h3>
+    <p class="note">Estas plataformas no permiten que otras apps lean sus ofertas. Estos botones abren su buscador con tu búsqueda ya escrita.</p>
+    <div class="links" id="deep"></div>
+  </div>
+  <p class="note" id="attrib">Ofertas en vivo de <a href="https://remotive.com" target="_blank" rel="noopener">Remotive</a>, <a href="https://jobicy.com" target="_blank" rel="noopener">Jobicy</a>, <a href="https://remoteok.com" target="_blank" rel="noopener">Remote OK</a>, <a href="https://himalayas.app" target="_blank" rel="noopener">Himalayas</a>, <a href="https://www.arbeitnow.com" target="_blank" rel="noopener">Arbeitnow</a> y <a href="https://www.freelancer.com" target="_blank" rel="noopener">Freelancer</a>. Tasas de cambio: <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener">ExchangeRate-API</a>.</p>
+</section>
+
+<!-- LLAVES -->
+<section class="view" id="v-llaves">
+  <h2>Mapa de llaves del mercado</h2>
+  <p class="note">Calculado con las ofertas de tu última búsqueda. Cada llave es un elemento clave que te falta. Arriba están las <b>llaves multiplicadoras</b>: las que, si las consigues, convierten más ofertas en “Aplica hoy”.</p>
+  <div id="kmap"><div class="empty">Haz una búsqueda primero.</div></div>
+</section>
+
+<!-- NICHOS -->
+<section class="view" id="v-nichos">
+  <h2>Nichos y productos</h2>
+  <div class="card">
+    <h3 style="margin-top:0">Explorar un nicho o servicio</h3>
+    <div class="row" style="flex-wrap:nowrap">
+      <input type="text" id="nq" placeholder="Ej.: chatbot whatsapp, guía CONTE, plantillas excel" enterkeyhint="search">
+      <button class="btn" id="ngo">Medir</button>
+    </div>
+    <div id="nres"></div>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Analizar mi idea con Kairzen Raycer</h3>
+    <input type="text" id="idea" placeholder="Mi idea: producto, servicio o trabajo">
+    <div style="height:8px"></div>
+    <input type="text" id="ideaObj" placeholder="Resultado objetivo (ej.: primer ingreso de 100 USD en 30 días)">
+    <div id="ideaKeys"></div>
+    <div id="ideaOut"></div>
+    <div class="row" style="margin-top:8px"><button class="btn gold small" id="ideaClaude">Análisis profundo con Claude</button></div>
+  </div>
+  <h3>Oportunidades investigadas para tu perfil</h3>
+  <p class="note">De la investigación del 24 de septiembre de 2026. Los índices son estimaciones; verifica precios y comisiones en las páginas oficiales.</p>
+  <div id="catalog"></div>
+</section>
+
+<!-- GUARDADAS -->
+<section class="view" id="v-guardadas">
+  <h2>Mis oportunidades</h2>
+  <p class="note">Las ofertas que guardas. Cambia el estado a medida que avanzas: así ves tu cadena real.</p>
+  <div id="saved"><div class="empty">Aún no has guardado ninguna oferta.</div></div>
+</section>
+
+<!-- PERFIL -->
+<section class="view" id="v-perfil">
+  <h2>Mis llaves (lo que tengo disponible)</h2>
+  <p class="note">Marca lo que ya tienes posesionado. La app compara cada oferta contra esto. Solo marca lo que puedes usar hoy, no lo que estás aprendiendo: si no, el índice te miente.</p>
+  <div class="card"><h3 style="margin-top:0">Habilidades</h3><div class="grid2" id="pSkills"></div></div>
+  <div class="card">
+    <h3 style="margin-top:0">Idioma y experiencia</h3>
+    <label class="muted" for="pEng">Nivel de inglés</label>
+    <select id="pEng"><option value="0">Ninguno</option><option value="1">Básico</option><option value="2">Intermedio</option><option value="3">Avanzado / fluido</option></select>
+    <div style="height:8px"></div>
+    <label class="muted" for="pYears">Años de experiencia demostrable en tu área</label>
+    <input type="number" id="pYears" min="0" max="40" step="1">
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Ubicación y documentos</h3>
+    <label class="muted" for="pCountry">País desde donde trabajas</label>
+    <select id="pCountry"><option>Colombia</option><option>Venezuela</option><option>Otro</option></select>
+    <div class="grid2" id="pDocs" style="margin-top:8px"></div>
+  </div>
+  <div class="card"><h3 style="margin-top:0">Cómo puedo cobrar</h3><div class="grid2" id="pPay"></div></div>
+  <div class="card"><h3 style="margin-top:0">Cuentas en plataformas</h3><div class="grid2" id="pAcc"></div></div>
+  <div class="card">
+    <h3 style="margin-top:0">Recursos</h3>
+    <label class="muted" for="pHours">Horas al día disponibles</label>
+    <input type="number" id="pHours" min="1" max="16" step="1">
+    <div style="height:8px"></div>
+    <label class="muted" for="pCapital">Capital disponible para invertir (USD)</label>
+    <input type="number" id="pCapital" min="0" step="10">
+    <div style="height:8px"></div>
+    <label class="muted" for="pP2P">Tasa USDT → Bs (Binance P2P). La oficial BCV se actualiza sola.</label>
+    <input type="number" id="pP2P" min="1" step="0.01">
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Apariencia</h3>
+    <select id="pTheme"><option value="">Automática</option><option value="light">Clara</option><option value="dark">Oscura</option></select>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Instalar en tu móvil</h3>
+    <p class="note">En Chrome para Android: menú ⋮ → <b>Instalar app</b> o <b>Agregar a pantalla principal</b>. Queda con su ícono y abre a pantalla completa.</p>
+    <button class="btn small" id="installBtn" style="display:none">Instalar ahora</button>
+  </div>
+</section>
+</main>
+
+<nav class="bottom" aria-label="Secciones">
+  <button class="on" data-v="buscar"><span class="ic">⌕</span>Buscar</button>
+  <button data-v="llaves"><span class="ic">⚿</span>Llaves</button>
+  <button data-v="nichos"><span class="ic">◈</span>Nichos</button>
+  <button data-v="guardadas"><span class="ic">★</span>Guardadas</button>
+  <button data-v="perfil"><span class="ic">☰</span>Perfil</button>
+</nav>
+<div class="toast" id="toast" role="status"></div>
+<script>
+"use strict";
+/* ═══════════ utilidades ═══════════ */
+const $ = s => document.querySelector(s);
+const enc = encodeURIComponent;
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem('kr_'+k); return v===null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem('kr_'+k, JSON.stringify(v)); }catch(e){} }
+};
+function el(tag, attrs, ...kids){
+  const n = document.createElement(tag);
+  if (attrs) for (const [k,v] of Object.entries(attrs)){
+    if (v==null || v===false) continue;
+    if (k==='class') n.className=v; else if (k==='text') n.textContent=v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v);
+  }
+  for (const c of kids.flat()){ if (c==null||c===false) continue; n.append(c.nodeType ? c : document.createTextNode(String(c))); }
+  return n;
+}
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.style.display='block'; clearTimeout(toast._t); toast._t=setTimeout(()=>t.style.display='none',2600); }
+function stripHTML(h){ if(!h) return ''; try{ return (new DOMParser().parseFromString(String(h),'text/html').body.textContent||'').replace(/\s+/g,' ').trim(); }catch(e){ return String(h).replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(); } }
+function fmt(n, dec){ if(n==null||isNaN(n)) return '—'; return Number(n).toLocaleString('es-CO',{maximumFractionDigits:dec??0}); }
+function short(n){ if(n>=1e9) return fmt(n/1e9,1)+' mil M'; if(n>=1e6) return fmt(n/1e6,1)+' M'; if(n>=1e4) return fmt(n/1e3,0)+' mil'; return fmt(n,0); }
+function ago(iso){ if(!iso) return ''; const t=new Date(iso).getTime(); if(isNaN(t)) return ''; const d=Math.round((Date.now()-t)/864e5); return d<=0?'hoy':d===1?'hace 1 día':d<60?`hace ${d} días`:`hace ${Math.round(d/30)} meses`; }
+function toISO(v){ if(v==null||v==='') return ''; if(typeof v==='number'){ return new Date(v<1e12?v*1000:v).toISOString(); } const t=new Date(v); return isNaN(t)?'':t.toISOString(); }
+function withTimeout(ms){ const c=new AbortController(); setTimeout(()=>c.abort(),ms); return c.signal; }
+
+/* ═══════════ catálogo de llaves ═══════════ */
+const SKILLS = [
+  {id:'python', label:'Python', re:/\bpython\b|django|flask|fastapi|pandas/i, how:'Ya es tu base; súmale 2 demos públicas en GitHub.'},
+  {id:'js', label:'JavaScript / web', re:/javascript|typescript|\bnode\.?js\b|\breact\b|\bvue\b|angular|next\.js|\bfront-?end\b/i, how:'Curso gratis de JavaScript (freeCodeCamp) y una mini web propia.'},
+  {id:'auto', label:'Automatización', re:/automat|zapier|make\.com|\bn8n\b|\brpa\b|scrap|workflow/i, how:'Construye un flujo en n8n o Make y grábalo en video de 60 s.'},
+  {id:'bots', label:'Chatbots / bots', re:/chat ?bot|\bbots?\b|whatsapp (business )?api|telegram bot|conversational/i, how:'Bot demo de WhatsApp o Telegram para un tipo de negocio.'},
+  {id:'ia', label:'IA / prompts / LLM', re:/\bai\b|\bia\b|artificial intelligence|inteligencia artificial|machine learning|\bllms?\b|prompt|\bgpt|openai|claude|genai|generative/i, how:'Documenta 3 casos donde resolviste algo con IA.'},
+  {id:'annot', label:'Evaluación / anotación de IA', re:/annotat|anotaci|labell?ing|etiquetad|\brater\b|evaluador|ai trainer|entrenador de ia|rlhf/i, how:'Postula en Appen, TELUS Digital y Outlier desde sus sitios oficiales.'},
+  {id:'crypto', label:'Cripto / trading', re:/crypto|cripto|blockchain|web3|binance|trading|defi|\bnft/i, how:'Muestra tu bot o análisis sin prometer rentabilidad.'},
+  {id:'elec', label:'Electricidad / energía', re:/electric|eléctric|electrician|electricista|solar|fotovolt|photovolt|\benerg(y|ía)\b|hvac|aire acondicionado/i, how:'Tienes el TSU; para ejercer formal en Colombia falta la matrícula CONTE.'},
+  {id:'ecom', label:'E-commerce / dropshipping', re:/e-?commerce|shopify|dropship|woocommerce|tienda online|amazon (seller|fba)|marketplace/i, how:'Tu tienda Shopify y Dropi sirven de portafolio.'},
+  {id:'ventas', label:'Ventas', re:/\bsales\b|ventas|vendedor|\bcloser\b|appointment setter|business development|lead gen|\bsdr\b|\bbdr\b/i, how:'Guion de ventas y 3 casos de cierre por WhatsApp.'},
+  {id:'soporte', label:'Soporte / atención al cliente', re:/customer (support|service|success)|soporte|atención al cliente|help ?desk|support (specialist|agent|representative)|call center/i, how:'Practica respuestas en español e inglés; destaca tu atención por WhatsApp.'},
+  {id:'redac', label:'Redacción / contenido', re:/\bwriter\b|writing|copywrit|redact|content (creator|writer|creation)|contenido|\bblog\b|\beditor\b/i, how:'Publica 3 textos de muestra (tus libros Rumbo Claro cuentan).'},
+  {id:'mkt', label:'Marketing digital', re:/marketing|\bseo\b|\bsem\b|social media|redes sociales|community manager|paid ads|meta ads|google ads|publicidad/i, how:'Certificación gratis de Google Skillshop o Meta Blueprint.'},
+  {id:'diseno', label:'Diseño', re:/\bdesign(er)?\b|diseñ|figma|canva|photoshop|illustrator|ui\/ux|\bux\b/i, how:'Portafolio de 5 piezas en Canva o Figma.'},
+  {id:'excel', label:'Excel / hojas de cálculo', re:/excel|spreadsheet|google sheets|hojas de cálculo/i, how:'Plantilla propia con fórmulas como muestra.'},
+  {id:'sql', label:'SQL / bases de datos', re:/\bsql\b|postgres|mysql|database|base de datos|mongodb/i, how:'Curso gratis de SQL y un proyecto con datos reales.'},
+  {id:'asist', label:'Asistencia virtual / datos', re:/virtual assistant|asistente virtual|admin(istrative)? assistant|data entry|entrada de datos|back ?office/i, how:'Perfil de asistente virtual bilingüe con herramientas que dominas.'},
+  {id:'trad', label:'Traducción', re:/translat|traducc|bilingual|bilingüe|localization/i, how:'Necesita inglés avanzado; muestra 2 traducciones.'},
+  {id:'video', label:'Edición de video', re:/video edit|edición de video|premiere|capcut|after effects|youtube editor/i, how:'Edita 3 videos cortos con CapCut como muestra.'},
+];
+const DOCS = [{id:'ppt',label:'PPT (Colombia)'},{id:'pasaporte',label:'Pasaporte vigente'},{id:'tsu',label:'Título TSU'},{id:'apost',label:'Título apostillado'},{id:'conte',label:'Matrícula CONTE'},{id:'rut',label:'RUT (DIAN)'}];
+const PAYS = [{id:'payoneer',label:'Payoneer'},{id:'usdt',label:'Binance / USDT'},{id:'pagomovil',label:'Pago Móvil'},{id:'nequi',label:'Nequi / banco COL'},{id:'paypal',label:'PayPal'},{id:'wise',label:'Wise'}];
+const ACCS = [{id:'workana',label:'Workana'},{id:'upwork',label:'Upwork'},{id:'fiverr',label:'Fiverr'},{id:'freelancer',label:'Freelancer'},{id:'hotmart',label:'Hotmart'},{id:'github',label:'GitHub con demos'}];
+
+/* perfil por defecto: lo que ya se sabe de ti; edítalo en Perfil */
+const DEFAULT_PROFILE = {
+  skills:['python','bots','ia','crypto','elec','ecom','ventas','redac','auto'],
+  eng:1, years:2, country:'Colombia', docs:['ppt','tsu'], pay:['payoneer','usdt','pagomovil'],
+  acc:['hotmart'], hours:4, capital:50, p2p:957.25, theme:''
+};
+let P = Object.assign({}, DEFAULT_PROFILE, store.get('profile', {}));
+function saveP(){ store.set('profile', P); }
+
+/* ═══════════ monedas ═══════════ */
+let RATES = store.get('rates', {COP:3900, VES:842.21, EUR:0.86, GBP:0.75, t:0, live:false});
+async function loadRates(){
+  if (RATES.live && Date.now()-RATES.t < 6*3600e3) return showRates();
+  try{
+    const r = await fetch('https://open.er-api.com/v6/latest/USD',{signal:withTimeout(10000)});
+    const j = await r.json();
+    if (j && j.rates && j.rates.COP){ RATES = Object.assign({}, j.rates, {t:Date.now(), live:true}); store.set('rates', RATES); }
+  }catch(e){ /* se usan las últimas tasas guardadas */ }
+  showRates();
+}
+function showRates(){
+  $('#rates').textContent = `1 USD ≈ ${fmt(RATES.COP)} COP · ${fmt(RATES.VES,2)} Bs (BCV) · 1 USDT ≈ ${fmt(P.p2p,2)} Bs (P2P)` + (RATES.live ? '' : ' · tasas aproximadas sin conexión');
+}
+function usd(amount, cur){ if(amount==null||isNaN(amount)) return null; cur=(cur||'USD').toUpperCase(); if(cur==='USD'||cur==='USDT') return +amount; const r=RATES[cur]; return r? amount/r : null; }
+function payLine(pay){
+  if(!pay || pay.min==null) return null;
+  const lo=usd(pay.min,pay.cur), hi=usd(pay.max??pay.min,pay.cur); if(lo==null) return null;
+  let m1=lo, m2=hi, per;
+  if(pay.per==='year'){ m1=lo/12; m2=hi/12; per='/mes'; }
+  else if(pay.per==='hour'){ const h=(P.hours||4)*22; m1=lo*h; m2=hi*h; per=`/mes con tus ${P.hours} h/día`; }
+  else if(pay.per==='month'){ per='/mes'; }
+  else per=' por proyecto';
+  const rng=(a,b,f)=> Math.round(a)===Math.round(b) ? f(a) : `${f(a)}–${f(b)}`;
+  return `≈ ${rng(m1,m2,x=>fmt(x))} USD${per} · ${rng(m1*RATES.COP,m2*RATES.COP,short)} COP · ${rng(m1*P.p2p,m2*P.p2p,short)} Bs (P2P) · ${rng(m1,m2,x=>fmt(x))} USDT`;
+}
+function parseSalaryText(s){
+  if(!s) return null; const t=String(s).toLowerCase().replace(/,/g,'');
+  const nums=[...t.matchAll(/(\d+(?:\.\d+)?)\s*(k)?/g)].map(m=>parseFloat(m[1])*(m[2]?1000:1)).filter(n=>n>=5);
+  if(!nums.length) return null;
+  const cur = /€|eur/.test(t)?'EUR' : /£|gbp/.test(t)?'GBP' : 'USD';
+  const per = /hour|hr\b|hora|\/h\b/.test(t)?'hour' : /month|mes|\/mo/.test(t)?'month' : 'year';
+  return {min:Math.min(...nums.slice(0,2)), max:Math.max(...nums.slice(0,2)), cur, per};
+}
+
+/* ═══════════ fuentes en vivo ═══════════ */
+const SOURCES = [
+  { id:'remotive', name:'Remotive', search:true,
+    url:q=>`https://remotive.com/api/remote-jobs?search=${enc(q)}&limit=40`,
+    parse:j=>(j.jobs||[]).map(x=>({ id:'rm-'+x.id, source:'Remotive', title:x.title, company:x.company_name, url:x.url,
+      location:x.candidate_required_location||'', tags:x.tags||[], date:toISO(x.publication_date), desc:stripHTML(x.description), pay:parseSalaryText(x.salary), payText:x.salary||'' })) },
+  { id:'jobicy', name:'Jobicy', search:true,
+    url:q=>`https://jobicy.com/api/v2/remote-jobs?count=50&tag=${enc(q)}`,
+    parse:j=>(j.jobs||[]).map(x=>({ id:'jc-'+x.id, source:'Jobicy', title:stripHTML(x.jobTitle), company:x.companyName, url:x.url,
+      location:x.jobGeo||'', tags:[].concat(x.jobIndustry||[], x.jobType||[], x.jobLevel?[x.jobLevel]:[]), date:toISO(x.pubDate), desc:stripHTML(x.jobDescription||x.jobExcerpt),
+      pay: x.annualSalaryMin ? {min:+x.annualSalaryMin, max:+(x.annualSalaryMax||x.annualSalaryMin), cur:x.salaryCurrency||'USD', per:'year'} : null })) },
+  { id:'remoteok', name:'Remote OK', search:true,
+    url:q=>`https://remoteok.com/api?tag=${enc((q||'').trim().split(/\s+/)[0]||'')}`,
+    parse:j=>(Array.isArray(j)?j:[]).filter(x=>x && x.id && x.position).map(x=>({ id:'ro-'+x.id, source:'Remote OK', title:x.position, company:x.company,
+      url:x.url || ('https://remoteok.com/remote-jobs/'+x.slug), location:x.location||'', tags:x.tags||[], date:toISO(x.date||x.epoch), desc:stripHTML(x.description),
+      pay: x.salary_min ? {min:+x.salary_min, max:+(x.salary_max||x.salary_min), cur:'USD', per:'year'} : null })) },
+  { id:'himalayas', name:'Himalayas', search:false,
+    url:()=>`https://himalayas.app/jobs/api?limit=100`,
+    parse:j=>(j.jobs||[]).map(x=>({ id:'hm-'+(x.guid||x.applicationLink||x.title), source:'Himalayas', title:x.title, company:x.companyName,
+      url:x.applicationLink||x.guid, location:(x.locationRestrictions&&x.locationRestrictions.length)?x.locationRestrictions.map(r=>typeof r==='string'?r:(r&&(r.name||r.country))||'').filter(Boolean).join(', '):'Worldwide',
+      tags:[].concat(x.categories||[], x.parentCategories||[], x.seniority||[]), date:toISO(x.pubDate), desc:stripHTML(x.description||x.excerpt),
+      pay: x.minSalary ? {min:+x.minSalary, max:+(x.maxSalary||x.minSalary), cur:x.currency||'USD', per:'year'} : null })) },
+  { id:'arbeitnow', name:'Arbeitnow', search:false,
+    url:()=>`https://www.arbeitnow.com/api/job-board-api`,
+    parse:j=>(j.data||[]).map(x=>({ id:'an-'+x.slug, source:'Arbeitnow', title:x.title, company:x.company_name, url:x.url,
+      location:(x.remote?'Remote · ':'')+(x.location||''), tags:[].concat(x.tags||[], x.job_types||[]), date:toISO(x.created_at), desc:stripHTML(x.description), pay:null })) },
+  { id:'freelancer', name:'Freelancer', search:true, freelance:true,
+    url:q=>`https://www.freelancer.com/api/projects/0.1/projects/active/?query=${enc(q)}&limit=30&full_description=true&job_details=true`,
+    parse:j=>(((j||{}).result||{}).projects||[]).map(x=>({ id:'fl-'+x.id, source:'Freelancer', title:x.title, company:'Cliente en Freelancer',
+      url:'https://www.freelancer.com/projects/'+(x.seo_url||x.id), location:'Worldwide', tags:(x.jobs||[]).map(t=>t.name),
+      date:toISO(x.time_submitted), desc:stripHTML(x.description||x.preview_description),
+      pay: x.budget ? {min:+x.budget.minimum, max:+(x.budget.maximum||x.budget.minimum), cur:((x.currency||{}).code)||'USD', per: x.type==='hourly'?'hour':'project'} : null,
+      bids: (x.bid_stats||{}).bid_count, bidAvg:(x.bid_stats||{}).bid_avg })) },
+];
+SOURCES.forEach(s=>$('#fSrc').append(el('option',{value:s.id,text:s.name})));
+
+async function fetchSource(src, q){
+  const key = `cache_${src.id}_${src.search?q.toLowerCase():'all'}`;
+  const c = store.get(key, null);
+  if (c && Date.now()-c.t < 3600e3) return {items:c.items, cached:true};
+  const r = await fetch(src.url(q), {signal:withTimeout(15000), headers:{'Accept':'application/json'}});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  const j = await r.json();
+  let items = src.parse(j).filter(x=>x.title && /^https?:\/\//i.test(String(x.url||'')));
+  items.forEach(x=>{ x.title=String(x.title); x.company=x.company?String(x.company):''; x.location=String(x.location||''); x.tags=(x.tags||[]).map(String); });
+  items.forEach(x=>{ x.desc=(x.desc||'').slice(0,4000); });
+  store.set(key, {t:Date.now(), items});
+  return {items, cached:false};
+}
+function matchesQuery(job, q){
+  const toks = q.toLowerCase().split(/[\s,]+/).filter(t=>t.length>1); if(!toks.length) return true;
+  const hay = (job.title+' '+(job.tags||[]).join(' ')+' '+job.desc).toLowerCase();
+  return toks.some(t=>hay.includes(t));
+}
+
+/* ═══════════ motor Kairzen Raycer ═══════════ */
+const OPEN_LOC = /worldwide|anywhere|global|mundial|\blatam\b|latin ?america|latinoam|south america|\bamericas\b|colombia|venezuela|sudam[eé]rica/i;
+const CLOSED_LOC = /\b(usa|u\.s\.a?|us only|us-based|united states|canada|\buk\b|united kingdom|europe|european|\beu\b|emea|germany|deutschland|berlin|munich|münchen|hamburg|london|france|paris|netherlands|amsterdam|poland|spain|españa|portugal|australia|india|philippines|singapore|japan|ireland|switzerland|austria|sweden|israel)\b/i;
+const EN_WORDS = /\b(the|and|with|you|will|our|for|experience|team|we|are|your)\b/gi;
+const ES_WORDS = /\b(el|la|los|las|con|para|experiencia|equipo|nosotros|somos|tu|que)\b/gi;
+
+function analyze(job){
+  const text = `${job.title} ${(job.tags||[]).join(' ')} ${job.desc}`;
+  const keys = [];
+  // habilidades
+  for (const s of SKILLS){ if (s.re.test(text)) keys.push({label:s.label, st: P.skills.includes(s.id)?'tiene':'alcanzable', how:s.how, sid:s.id}); }
+  if (!keys.length) keys.push({label:`Competencia en: ${job.title.slice(0,60)}`, st:'verificar', how:'Lee la oferta completa y confirma si dominas lo que piden.'});
+  // idioma
+  const en=(text.match(EN_WORDS)||[]).length, es=(text.match(ES_WORDS)||[]).length;
+  const needEn = /english|inglés|ingles/i.test(text) || en > es*1.5;
+  if (needEn){
+    const lvl = /fluent|native|excellent english|\bc1\b|\bc2\b|advanced english|inglés avanzado/i.test(text) ? 3 : /basic english|inglés básico|ingles basico/i.test(text) ? 1 : 2;
+    keys.push({label: lvl===3?'Inglés avanzado / fluido':lvl===1?'Inglés básico':'Inglés intermedio', st: P.eng>=lvl?'tiene':'alcanzable', how:'Práctica diaria de conversación y escritura; es la llave que más ofertas abre en remoto.', sid:'eng'});
+  } else keys.push({label:'Español', st:'tiene', how:''});
+  if (/deutsch|german (is )?(required|fluent|skills)|fluent german|alemán|portugu[eê]s (fluente|required)|fluent portuguese|french (required|fluent)|francés/i.test(text))
+    keys.push({label:'Otro idioma requerido (alemán, portugués o francés)', st:'alcanzable', how:'Llave de largo plazo: si no la tienes, prioriza otras ofertas.'});
+  // ubicación: eslabón crítico
+  const loc = job.location||'';
+  const mine = new RegExp(P.country,'i');
+  if (mine.test(loc) || OPEN_LOC.test(loc)) keys.push({label:`Trabajar desde ${P.country}`, st:'tiene', how:''});
+  else if (CLOSED_LOC.test(loc) || (!loc && CLOSED_LOC.test(job.desc.slice(0,600)) && /only|must (be|reside)|based in|located in/i.test(job.desc.slice(0,600))))
+    keys.push({label:`Residencia o permiso en: ${loc || 'país indicado en la oferta'}`, st:'noviable', how:'Restricción geográfica: no depende de ti. Busca ofertas “Worldwide” o “LATAM”.', critical:true});
+  else keys.push({label:'Aceptan candidatos de tu país', st:'verificar', how:'La oferta no lo dice claro: confírmalo antes de invertir tiempo.'});
+  // experiencia
+  const ym = text.match(/(\d{1,2})\+?\s*(?:years|year|años|anos)/i);
+  if (ym){ const y=+ym[1]; if (y<=15) keys.push({label:`${y}+ años de experiencia`, st: P.years>=y?'tiene':'alcanzable', how:'Compensa con proyectos demostrables y resultados medibles.'}); }
+  // título
+  if (/bachelor|degree|licenciatura|university degree|título universitario|ingenier[oa] graduad/i.test(text))
+    keys.push({label:'Título universitario', st: P.docs.includes('tsu')?'verificar':'alcanzable', how:'Tienes TSU: pregunta si lo aceptan o si pesa más la experiencia.'});
+  // cobro
+  if (job.source==='Freelancer') keys.push({label:'Cuenta en Freelancer', st:P.acc.includes('freelancer')?'tiene':'alcanzable', how:'Crear perfil gratis y completar verificación.'});
+  const canIntl = ['payoneer','wise','usdt','paypal'].some(p=>P.pay.includes(p));
+  keys.push({label:'Cobro internacional (Payoneer / Wise / USDT)', st:canIntl?'tiene':'alcanzable', how:'Payoneer o Wise gratis; USDT vía Binance.'});
+  // índices
+  const n=keys.length, tiene=keys.filter(k=>k.st==='tiene').length, alc=keys.filter(k=>k.st==='alcanzable').length;
+  const noviable=keys.some(k=>k.st==='noviable'), verif=keys.filter(k=>k.st==='verificar').length;
+  const ipf=Math.round(tiene/n*100), ipa=Math.round((tiene+alc)/n*100);
+  let v, vc, tier;
+  if (noviable){ v='No aplicable tal como está'; vc='v-bad'; tier=3; }
+  else if (alc===0 && verif===0){ v='Aplica hoy'; vc='v-ok'; tier=0; }
+  else if (ipf>=50){ v='Casi: te faltan llaves'; vc='v-warn'; tier=1; }
+  else { v='Lejana: construye llaves'; vc='v-far'; tier=2; }
+  // competencia
+  let comp=null;
+  if (job.bids!=null){ comp = job.bids<=10?`baja (${job.bids} propuestas)`:job.bids<=30?`media (${job.bids} propuestas)`:`alta (${job.bids} propuestas)`; }
+  else if (/worldwide|anywhere|global/i.test(loc) || !loc) comp='alta (estimada: abierta a todo el mundo)';
+  else if (OPEN_LOC.test(loc)) comp='media (estimada: región limitada)';
+  const missing = keys.filter(k=>k.st==='alcanzable');
+  let step;
+  if (tier===0) step=`Aplica hoy. En tu mensaje demuestra: ${keys.filter(k=>k.st==='tiene'&&k.sid).map(k=>k.label).slice(0,3).join(', ')||'tus llaves'}.`;
+  else if (noviable) step='No inviertas tiempo aquí: el eslabón crítico no depende de ti.';
+  else if (missing.length) step=`Llave prioritaria: ${missing[0].label}. ${missing[0].how}`;
+  else step='Confirma los puntos “por verificar” antes de aplicar.';
+  return {keys, ipf, ipa, v, vc, tier, comp, step, noviable};
+}
+
+/* ═══════════ búsqueda ═══════════ */
+let LAST = store.get('last', {q:'', jobs:[]});
+async function search(){
+  const q = $('#q').value.trim(); if(!q){ toast('Escribe qué buscas'); return; }
+  const go=$('#go'); go.disabled=true; go.innerHTML='<span class="spin"></span>';
+  const st=$('#srcStatus'); st.innerHTML=''; const pills={};
+  for (const s of SOURCES){ pills[s.id]=el('span',{text:s.name+' …'}); st.append(pills[s.id]); }
+  const results = await Promise.allSettled(SOURCES.map(s=>fetchSource(s,q).then(r=>({s,r}))));
+  let jobs=[];
+  results.forEach((res,i)=>{
+    const s=SOURCES[i], pill=pills[s.id];
+    if (res.status==='fulfilled'){
+      let items=res.value.r.items; if(!s.search || s.id==='remoteok') items=items.filter(j=>matchesQuery(j,q));
+      jobs=jobs.concat(items); pill.className='ok'; pill.textContent=`${s.name} ${items.length}${res.value.r.cached?' (guardado)':''}`;
+    } else { pill.className='err'; pill.textContent=`${s.name}: sin respuesta`; }
+  });
+  const seen=new Set(); jobs=jobs.filter(j=>{ const k=(j.title+'|'+(j.company||'')).toLowerCase(); if(seen.has(k)) return false; seen.add(k); return true; });
+  LAST={q, jobs, t:Date.now()}; store.set('last', LAST);
+  go.disabled=false; go.textContent='Buscar';
+  renderResults(); renderDeep(q); renderKmap();
+}
+function jobCard(job, savedMode){
+  const a=analyze(job); const pl=payLine(job.pay);
+  const saved=store.get('saved',{});
+  const card=el('div',{class:'card job'},
+    el('div',{class:'row',style:'justify-content:space-between;flex-wrap:nowrap;align-items:flex-start'},
+      el('div',null, el('h4',{text:job.title}), el('div',{class:'meta',text:[job.company, job.source, job.location||'ubicación no indicada', ago(job.date)].filter(Boolean).join(' · ')})),
+      el('span',{class:'badge '+a.vc,text:a.v})),
+    el('div',{class:'idx'},
+      el('div',null, el('small',{text:'IPF · llaves que ya tienes'}), el('strong',{text:a.ipf+'%'}), el('div',{class:'bar'}, el('i',{style:`width:${a.ipf}%`}))),
+      el('div',null, el('small',{text:'IPA · llaves alcanzables'}), el('strong',{text:a.ipa+'%'}), el('div',{class:'bar'}, el('i',{style:`width:${a.ipa}%;background:var(--gold)`})))),
+    pl ? el('div',{class:'pay',text:'💵 '+pl}) : (job.payText ? el('div',{class:'pay',text:'💵 '+job.payText}) : el('div',{class:'pay muted',text:'💵 Pago no publicado'})),
+    a.comp ? el('div',{class:'meta',text:'Competencia: '+a.comp}) : null,
+    el('div',{class:'step',text:a.step}),
+    el('details',null, el('summary',{text:`Ver las ${a.keys.length} llaves de esta oferta`}),
+      el('ul',{class:'keys'}, a.keys.map(k=>el('li',null, el('span',{class:'dot d-'+k.st}),
+        el('div',null, k.label+' — '+({tiene:'la tienes',alcanzable:'te falta (alcanzable)',verificar:'por verificar',noviable:'NO VIABLE'})[k.st], k.how && k.st!=='tiene' ? el('em',{text:k.how}) : null)))),
+      el('p',{class:'note',text:(job.desc||'').slice(0,420)+((job.desc||'').length>420?'…':'')})),
+    el('div',{class:'row',style:'margin-top:8px'},
+      el('a',{class:'btn small',href:job.url,target:'_blank',rel:'noopener',style:'text-decoration:none'},'Abrir oferta'),
+      savedMode ? null : el('button',{class:'btn ghost small',onclick:e=>{ toggleSave(job); e.target.textContent = store.get('saved',{})[job.id]?'★ Guardada':'☆ Guardar'; }}, saved[job.id]?'★ Guardada':'☆ Guardar'),
+      el('button',{class:'btn gold small',onclick:()=>deepClaude(job,a)},'Análisis con Claude')));
+  return card;
+}
+function renderResults(){
+  const box=$('#results'); box.innerHTML='';
+  if(!LAST.jobs.length){ box.append(el('div',{class:'empty',text: LAST.q ? 'Ninguna fuente devolvió ofertas para esta búsqueda. Prueba otra palabra (en inglés suele haber más) o usa los botones de abajo.' : 'Escribe qué sabes hacer o qué buscas y pulsa Buscar.'})); return; }
+  const fv=$('#fVer').value, fs=$('#fSrc').value;
+  let list=LAST.jobs.map(j=>({j,a:analyze(j)}));
+  if (fs!=='all') list=list.filter(x=>SOURCES.find(s=>s.id===fs).name===x.j.source);
+  if (fv==='ok') list=list.filter(x=>x.a.tier===0);
+  if (fv==='apt') list=list.filter(x=>!x.a.noviable);
+  list.sort((a,b)=> a.a.tier-b.a.tier || b.a.ipf-a.a.ipf || (b.j.date||'').localeCompare(a.j.date||''));
+  const nOk=LAST.jobs.filter(j=>analyze(j).tier===0).length, nNo=LAST.jobs.filter(j=>analyze(j).noviable).length;
+  box.append(el('p',{class:'note'}, `“${LAST.q}”: ${LAST.jobs.length} ofertas · `, el('b',{text:`${nOk} para aplicar hoy`}), ` · ${nNo} no aplicables desde ${P.country}. Mostrando ${Math.min(list.length,60)}.`));
+  list.slice(0,60).forEach(x=>box.append(jobCard(x.j)));
+}
+function renderDeep(q){
+  const k=enc(q), slug=q.toLowerCase().trim().replace(/\s+/g,'-');
+  const L=[
+    ['Workana', `https://www.workana.com/jobs?language=es&query=${k}`],
+    ['Upwork', `https://www.upwork.com/nx/search/jobs/?q=${k}`],
+    ['Freelancer', `https://www.freelancer.com/jobs/?keyword=${k}`],
+    ['Fiverr (qué se vende)', `https://www.fiverr.com/search/gigs?query=${k}`],
+    ['LinkedIn remoto', `https://www.linkedin.com/jobs/search/?keywords=${k}&f_WT=2`],
+    ['LinkedIn Colombia', `https://www.linkedin.com/jobs/search/?keywords=${k}&location=Colombia`],
+    ['Computrabajo Colombia', `https://co.computrabajo.com/trabajo-de-${enc(slug)}`],
+    ['Indeed Barranquilla', `https://co.indeed.com/jobs?q=${k}&l=Barranquilla`],
+    ['Get on Board (LatAm tech)', `https://www.getonbrd.com/`],
+    ['Appen (IA)', 'https://www.appen.com/careers'],
+    ['TELUS Digital (IA)', 'https://www.telusdigital.com/careers'],
+    ['Outlier (IA)', 'https://outlier.ai/'],
+  ];
+  const box=$('#deep'); box.innerHTML='';
+  L.forEach(([n,u])=>box.append(el('a',{href:u,target:'_blank',rel:'noopener',text:n})));
+}
+function toggleSave(job){ const s=store.get('saved',{}); if(s[job.id]){ delete s[job.id]; toast('Quitada de guardadas'); } else { s[job.id]={job, status:'Por aplicar', note:'', t:Date.now()}; toast('Guardada'); } store.set('saved',s); renderSaved(); }
+
+/* ═══════════ mapa de llaves (multiplicadores) ═══════════ */
+function renderKmap(){
+  const box=$('#kmap'); box.innerHTML='';
+  const jobs=LAST.jobs||[]; if(!jobs.length){ box.append(el('div',{class:'empty',text:'Haz una búsqueda primero.'})); return; }
+  const count={}; const unlock={}; const how={};
+  for (const j of jobs){
+    const a=analyze(j); if(a.noviable) continue;
+    const miss=a.keys.filter(k=>k.st==='alcanzable');
+    miss.forEach(k=>{ count[k.label]=(count[k.label]||0)+1; how[k.label]=k.how; });
+    // ¿con qué única llave esta oferta pasaría a "Aplica hoy"? (le falta solo esa y no hay nada por verificar)
+    if (miss.length===1 && !a.keys.some(k=>k.st==='verificar')) unlock[miss[0].label]=(unlock[miss[0].label]||0)+1;
+  }
+  const rows=Object.keys(count).map(l=>({l, c:count[l], u:unlock[l]||0})).sort((a,b)=>b.u-a.u||b.c-a.c);
+  if(!rows.length){ box.append(el('div',{class:'empty',text:'En esta búsqueda no te falta ninguna llave alcanzable: o ya las tienes, o las ofertas no son aplicables desde tu país.'})); return; }
+  box.append(el('p',{class:'note',text:`Basado en “${LAST.q}” (${jobs.length} ofertas).`}));
+  const ul=el('ul',{class:'keys kmap'});
+  rows.slice(0,15).forEach((r,i)=>ul.append(el('li',null,
+    el('div',null, el('span',{class:'n',text:(i+1)+'. '}), el('b',{text:r.l})),
+    el('em',{text:`Aparece en ${r.c} ${r.c===1?'oferta':'ofertas'}` + (r.u?` · conseguirla sola convierte ${r.u} ${r.u===1?'oferta':'ofertas'} en “Aplica hoy” (multiplicadora)`:'')}),
+    how[r.l] ? el('em',{text:'Cómo conseguirla: '+how[r.l]}) : null)));
+  box.append(el('div',{class:'card'}, ul));
+}
+
+/* ═══════════ guardadas ═══════════ */
+const STATES=['Por aplicar','Aplicada','Entrevista / conversación','Ganada','Descartada'];
+function renderSaved(){
+  const box=$('#saved'); box.innerHTML=''; const s=store.get('saved',{}); const arr=Object.values(s).sort((a,b)=>b.t-a.t);
+  if(!arr.length){ box.append(el('div',{class:'empty',text:'Aún no has guardado ninguna oferta.'})); return; }
+  const won=arr.filter(x=>x.status==='Ganada').length, act=arr.filter(x=>!['Ganada','Descartada'].includes(x.status)).length;
+  box.append(el('p',{class:'note',text:`${arr.length} guardadas · ${act} activas · ${won} ganadas`}));
+  arr.forEach(x=>{
+    const c=jobCard(x.job,true);
+    const sel=el('select',{onchange:e=>{ const s2=store.get('saved',{}); if(s2[x.job.id]){ s2[x.job.id].status=e.target.value; store.set('saved',s2); renderSaved(); } }}, STATES.map(o=>el('option',{value:o, selected:o===x.status?'selected':null, text:o})));
+    const note=el('textarea',{placeholder:'Notas: a quién escribiste, fecha, próximo paso'}); note.value=x.note||'';
+    note.addEventListener('change',e=>{ const s2=store.get('saved',{}); if(s2[x.job.id]){ s2[x.job.id].note=e.target.value; store.set('saved',s2); } });
+    c.append(el('div',{style:'margin-top:8px'}, sel), el('div',{style:'margin-top:6px'}, note),
+      el('div',{class:'row',style:'margin-top:6px'}, el('button',{class:'btn ghost small',onclick:()=>{ const s2=store.get('saved',{}); delete s2[x.job.id]; store.set('saved',s2); renderSaved(); }},'Quitar')));
+    box.append(c);
+  });
+}
+
+/* ═══════════ análisis profundo con Claude ═══════════ */
+function profileText(){
+  const lab=(arr,src)=>arr.map(id=>(src.find(x=>x.id===id)||{}).label).filter(Boolean).join(', ')||'ninguno';
+  return `Mis llaves (lo que tengo disponible): habilidades: ${lab(P.skills,SKILLS)}; inglés: ${['ninguno','básico','intermedio','avanzado'][P.eng]}; ${P.years} años de experiencia; vivo en ${P.country}; documentos: ${lab(P.docs,DOCS)}; cobro: ${lab(P.pay,PAYS)}; cuentas: ${lab(P.acc,ACCS)}; ${P.hours} h/día; capital ${P.capital} USD. Quiero cobrar en USD, USDT, COP o Bs.`;
+}
+async function copyAndOpen(text){
+  let ok=false; try{ await navigator.clipboard.writeText(text); ok=true; }catch(e){}
+  if(!ok){ const t=el('textarea'); t.value=text; document.body.append(t); t.select(); try{ ok=document.execCommand('copy'); }catch(e){} t.remove(); }
+  toast(ok?'Análisis copiado: pégalo en Claude':'No pude copiar; se abrirá Claude');
+  setTimeout(()=>window.open('https://claude.ai/new','_blank','noopener'),700);
+}
+function deepClaude(job,a){
+  const txt=`Aplica Kairzen Raycer a esta oportunidad.\n\nOFERTA: ${job.title} — ${job.company||''} (${job.source})\nUbicación: ${job.location||'no indicada'}\nPago: ${payLine(job.pay)||job.payText||'no publicado'}\nEnlace: ${job.url}\nDescripción: ${(job.desc||'').slice(0,2500)}\n\n${profileText()}\n\nAnálisis previo de la app: IPF ${a.ipf}% · IPA ${a.ipa}% · ${a.v}. Llaves: ${a.keys.map(k=>k.label+' ['+k.st+']').join('; ')}.\n\nHaz la IIR desde el resultado (ser contratado y cobrar), separa las llaves que tengo de las que me faltan, dime cuál es la llave prioritaria y el primer paso concreto de hoy, y escríbeme un mensaje de aplicación corto y directo que demuestre mis llaves. Señala cualquier riesgo de estafa.`;
+  copyAndOpen(txt);
+}
+
+/* ═══════════ nichos ═══════════ */
+async function measureNiche(){
+  const q=$('#nq').value.trim(); if(!q){ toast('Escribe un nicho o servicio'); return; }
+  const box=$('#nres'); box.innerHTML=''; const k=enc(q);
+  const info=el('div',{class:'step',text:'Midiendo demanda activa en Freelancer…'}); box.append(info);
+  try{
+    const r=await fetch(`https://www.freelancer.com/api/projects/0.1/projects/active/?query=${k}&limit=50&job_details=true`,{signal:withTimeout(15000)});
+    const j=await r.json(); const pr=((j.result||{}).projects)||[]; const total=(j.result||{}).total_count;
+    const bids=pr.map(p=>(p.bid_stats||{}).bid_count).filter(n=>n!=null); const avg=bids.length?Math.round(bids.reduce((a,b)=>a+b,0)/bids.length):null;
+    const budgets=pr.map(p=>p.budget&&usd((p.budget.minimum+(p.budget.maximum||p.budget.minimum))/2,(p.currency||{}).code)).filter(n=>n); budgets.sort((a,b)=>a-b);
+    const med=budgets.length?budgets[Math.floor(budgets.length/2)]:null;
+    info.textContent=`Demanda activa ahora: ${total!=null?fmt(total):pr.length} proyectos abiertos en Freelancer. Competencia: ${avg==null?'sin dato':avg<=10?'baja':avg<=30?'media':'alta'}${avg!=null?` (${avg} propuestas promedio)`:''}. Presupuesto típico: ${med?fmt(med)+' USD por proyecto':'sin dato'}.`;
+  }catch(e){ info.textContent='No pude medir la demanda en vivo (sin conexión o la fuente no respondió). Usa los enlaces de abajo.'; }
+  const links=[
+    ['Fiverr: qué se vende y a qué precio',`https://www.fiverr.com/search/gigs?query=${k}`],
+    ['Workana: demanda en español',`https://www.workana.com/jobs?language=es&query=${k}`],
+    ['Google Trends Colombia',`https://trends.google.com/trends/explore?geo=CO&q=${k}`],
+    ['Google Trends Venezuela',`https://trends.google.com/trends/explore?geo=VE&q=${k}`],
+    ['TikTok: contenido y competencia',`https://www.tiktok.com/search?q=${k}`],
+    ['YouTube',`https://www.youtube.com/results?search_query=${k}`],
+    ['Productos ganadores Dropi','https://www.dropdata.app/productos-ganadores-dropi'],
+  ];
+  box.append(el('div',{class:'links'}, links.map(([n,u])=>el('a',{href:u,target:'_blank',rel:'noopener',text:n}))));
+}
+const IDEA_KEYS=['Producto o servicio definido','Cliente concreto identificado','Canal para llegar al cliente','Método de cobro que funciona para ese cliente','Habilidad para producirlo o entregarlo','Prueba social (demo, reseña o caso)','Capital requerido ≤ mi capital','Tiempo requerido ≤ mis horas'];
+let IDEA=store.get('idea',{idea:'',obj:'',st:{}});
+function renderIdea(){
+  $('#idea').value=IDEA.idea; $('#ideaObj').value=IDEA.obj;
+  const box=$('#ideaKeys'); box.innerHTML='';
+  const ul=el('ul',{class:'keys'});
+  IDEA_KEYS.forEach(k=>{
+    const sel=el('select',{style:'width:auto;padding:6px 8px;font-size:13px',onchange:e=>{ IDEA.st[k]=e.target.value; store.set('idea',IDEA); ideaOut(); }},
+      [['tiene','La tengo'],['alcanzable','Me falta'],['verificar','Por verificar'],['noviable','No viable']].map(([v,t])=>el('option',{value:v,text:t,selected:(IDEA.st[k]||'verificar')===v?'selected':null})));
+    ul.append(el('li',null, el('div',{style:'flex:1'},k), sel));
+  });
+  box.append(ul); ideaOut();
+}
+function ideaOut(){
+  const vals=IDEA_KEYS.map(k=>IDEA.st[k]||'verificar'); const n=vals.length;
+  const t=vals.filter(v=>v==='tiene').length, al=vals.filter(v=>v==='alcanzable').length, nv=vals.includes('noviable');
+  const ipf=Math.round(t/n*100), ipa=Math.round((t+al)/n*100);
+  const first=IDEA_KEYS.find(k=>(IDEA.st[k]||'verificar')==='verificar'), miss=IDEA_KEYS.find(k=>IDEA.st[k]==='alcanzable');
+  const msg = nv ? 'Hay un eslabón no viable: redefine la idea o cambia la ruta antes de invertir.' :
+    first ? `Primero confirma: ${first}. Lo que está “por verificar” no cuenta en el IPA.` :
+    miss ? `Llave prioritaria: ${miss}.` : 'Tienes todas las llaves: ejecuta hoy.';
+  const box=$('#ideaOut'); box.innerHTML='';
+  box.append(el('div',{class:'idx'}, el('div',null,el('small',{text:'IPF'}),el('strong',{text:ipf+'%'})), el('div',null,el('small',{text:'IPA'}),el('strong',{text:ipa+'%'}))), el('div',{class:'step',text:msg}));
+}
+const CATALOG=[
+  {t:'Chatbot de WhatsApp con IA para pymes de Barranquilla', ipf:50, ipa:88, time:'2–4 semanas', inc:'150–800 USD/mes', have:'Python, IA, venta por WhatsApp, residencia en Colombia', miss:'Demo funcional, WhatsApp Cloud API, hosting barato, lista de 30–50 prospectos', step:'Construye un bot demo para un tipo de negocio y envía un video de 60 s a 10 negocios de tu barrio con 7 días de prueba.', risk:'Meta cambió su modelo de precios: verifica la tarifa oficial antes de cotizar. Cobra por adelantado.'},
+  {t:'Guías digitales Rumbo Claro de nicho técnico-migrante', ipf:50, ipa:88, time:'1–3 semanas', inc:'50–400 USD/mes', have:'Libros digitales, marca, WhatsApp Business, IA', miss:'Nicho validado, pasarela, tráfico orgánico, prueba social', step:'Pregunta en 3 grupos quién tramita la matrícula CONTE y ofrece preventa a 5 USD. Con 5 pagos, escribe la guía.', risk:'El trámite cambia: fecha y actualiza el producto. No lo vendas como asesoría oficial.'},
+  {t:'Evaluador de IA en español (Appen, TELUS, Outlier)', ipf:50, ipa:63, time:'1–8 semanas', inc:'100–600 USD/mes', have:'Español nativo, formación técnica, Python, disciplina diaria', miss:'Aprobar la evaluación, inglés escrito, cobro compatible, proyectos en tu país', step:'Postula hoy en los tres, solo desde sus sitios oficiales.', risk:'Trabajo intermitente. No uses IA para responder: lo detectan. Abundan falsos reclutadores.'},
+  {t:'Freelance de automatización con Python (Workana, Upwork)', ipf:38, ipa:88, time:'2–6 semanas', inc:'200–1.000 USD/mes', have:'Python, bot de trading como prueba técnica, IA', miss:'Perfil especializado, 2–3 demos en GitHub, primera reseña, inglés para Upwork', step:'Crea el perfil en Workana y envía 3 propuestas con video demo.', risk:'No vendas el bot de trading con promesas de ganancia.'},
+  {t:'Servicios eléctricos y diagnóstico de consumo en Barranquilla', ipf:29, ipa:57, time:'1–2 semanas como ayudante', inc:'150–500 USD/mes', have:'Conocimiento técnico (TSU), referencias de precios', miss:'Matrícula CONTE (no viable hoy), herramientas, canal de clientes, alianza con técnico matriculado', step:'Ofrécete como ayudante por jornada a 3 electricistas o instaladores solares matriculados.', risk:'Sin matrícula no firmes ni certifiques instalaciones.'},
+  {t:'Dropshipping contraentrega vía Dropi (modo orgánico)', ipf:38, ipa:75, time:'2–6 semanas', inc:'0–500 USD/mes', have:'Cuenta Dropi, experiencia Shopify, venta por WhatsApp', miss:'Producto validado, pauta (no viable hoy), contenido diario, confirmación de pedidos', step:'Elige un solo producto útil y véndelo a tu red de WhatsApp confirmando cada pedido.', risk:'Cada devolución cuesta 15.000–35.000 COP.'},
+  {t:'Micro-SaaS de confirmación de pedidos contraentrega', ipf:50, ipa:75, time:'1–3 meses', inc:'100–2.000 USD/mes a 6–12 meses', have:'Python, conocimiento de Dropi, IA, experiencia con bots', miss:'MVP, integración Shopify/Dropi, 3 usuarios beta, cobro recurrente', step:'Pregunta en 2 comunidades de Dropi su tasa de entrega y cuánto pagarían por subirla.', risk:'Dependencia de plataformas ajenas y competidores financiados.'},
+];
+function renderCatalog(){
+  const box=$('#catalog'); box.innerHTML='';
+  CATALOG.forEach(c=>box.append(el('div',{class:'card job'},
+    el('h4',{text:c.t}), el('div',{class:'meta',text:`Primer ingreso: ${c.time} · Potencial: ${c.inc}`}),
+    el('div',{class:'idx'}, el('div',null,el('small',{text:'IPF (estimado)'}),el('strong',{text:c.ipf+'%'})), el('div',null,el('small',{text:'IPA (estimado)'}),el('strong',{text:c.ipa+'%'}))),
+    el('div',{class:'step',text:'Hoy: '+c.step}),
+    el('details',null, el('summary',{text:'Llaves y riesgos'}), el('ul',{class:'keys'},
+      el('li',null,el('span',{class:'dot d-tiene'}),el('div',null,'Tienes: '+c.have)),
+      el('li',null,el('span',{class:'dot d-alcanzable'}),el('div',null,'Te falta: '+c.miss)),
+      el('li',null,el('span',{class:'dot d-noviable'}),el('div',null,'Riesgo: '+c.risk)))))));
+}
+
+/* ═══════════ perfil ═══════════ */
+function checks(boxId, list, field){
+  const box=$(boxId); box.innerHTML='';
+  list.forEach(it=>{ const cb=el('input',{type:'checkbox'}); cb.checked=P[field].includes(it.id);
+    cb.addEventListener('change',()=>{ P[field]=cb.checked?[...new Set([...P[field],it.id])]:P[field].filter(x=>x!==it.id); saveP(); refreshAll(); });
+    box.append(el('label',{class:'ck'}, cb, it.label)); });
+}
+function renderProfile(){
+  checks('#pSkills',SKILLS,'skills'); checks('#pDocs',DOCS,'docs'); checks('#pPay',PAYS,'pay'); checks('#pAcc',ACCS,'acc');
+  const bind=(id,f,num)=>{ const n=$(id); n.value=P[f]; n.onchange=()=>{ P[f]= num? Math.max(0,parseFloat(n.value)||0) : n.value; saveP(); if(f==='theme') applyTheme(); refreshAll(); }; };
+  bind('#pEng','eng',true); bind('#pYears','years',true); bind('#pCountry','country'); bind('#pHours','hours',true); bind('#pCapital','capital',true); bind('#pP2P','p2p',true); bind('#pTheme','theme');
+}
+function applyTheme(){ if(P.theme) document.documentElement.setAttribute('data-theme',P.theme); else document.documentElement.removeAttribute('data-theme'); }
+function refreshAll(){ showRates(); renderResults(); renderKmap(); renderSaved(); }
+
+/* ═══════════ sugerencias, navegación, instalación ═══════════ */
+const SUGG=['python','chatbot','automation','customer support spanish','ai trainer','data annotation','virtual assistant','shopify','electrician','crypto','spanish'];
+SUGG.forEach(s=>$('#sugg').append(el('button',{class:'chip',onclick:()=>{ $('#q').value=s; search(); }},s)));
+document.querySelectorAll('nav.bottom button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('nav.bottom button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('section.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+b.dataset.v));
+  window.scrollTo(0,0);
+}));
+$('#go').addEventListener('click',search);
+$('#q').addEventListener('keydown',e=>{ if(e.key==='Enter') search(); });
+$('#fVer').addEventListener('change',renderResults); $('#fSrc').addEventListener('change',renderResults);
+$('#ngo').addEventListener('click',measureNiche); $('#nq').addEventListener('keydown',e=>{ if(e.key==='Enter') measureNiche(); });
+$('#idea').addEventListener('change',e=>{ IDEA.idea=e.target.value; store.set('idea',IDEA); });
+$('#ideaObj').addEventListener('change',e=>{ IDEA.obj=e.target.value; store.set('idea',IDEA); });
+$('#ideaClaude').addEventListener('click',()=>{
+  const st=IDEA_KEYS.map(k=>`${k}: ${IDEA.st[k]||'verificar'}`).join('; ');
+  copyAndOpen(`Aplica Kairzen Raycer a mi idea.\n\nIDEA: ${IDEA.idea||'(sin escribir)'}\nRESULTADO OBJETIVO: ${IDEA.obj||'(sin escribir)'}\nEstado de llaves según yo: ${st}\n\n${profileText()}\n\nHaz la IIR desde el resultado objetivo, lista todas las llaves necesarias, marca cuáles tengo, cuáles me faltan y cuáles no son viables, calcula IPF e IPA, analiza la competencia del nicho, dime la llave multiplicadora y el primer paso de hoy con lo que ya tengo.`);
+});
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredPrompt=e; $('#installBtn').style.display='inline-block'; });
+$('#installBtn').addEventListener('click',async()=>{ if(!deferredPrompt) return; deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; $('#installBtn').style.display='none'; });
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+/* ═══════════ arranque ═══════════ */
+applyTheme(); renderProfile(); renderIdea(); renderCatalog(); renderSaved();
+if (LAST.q){ $('#q').value=LAST.q; renderResults(); renderDeep(LAST.q); renderKmap(); } else renderDeep('python');
+showRates(); loadRates();
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+KAIRZEN RAYCER · BUSCADOR DE OPORTUNIDADES
+Cómo ponerla en tu móvil y cómo sacar el APK
+=================================================
+
+La app necesita estar publicada en internet (con https) para instalarse
+en Android. Publicarla es gratis y toma unos 5 minutos.
+
+PASO 1 — Publicarla gratis (desde tu laptop)
+  1. Descomprime este ZIP. Te queda la carpeta "kairzen-buscador".
+  2. Entra a https://app.netlify.com/drop
+  3. Arrastra la carpeta completa a la página.
+  4. Netlify te da un enlace, por ejemplo https://algo-123.netlify.app
+  5. Crea la cuenta gratis que te pide para que el enlace no caduque.
+  (Alternativa: GitHub Pages, si ya usas GitHub.)
+
+PASO 2 — Instalarla en tu Android
+  1. Abre ese enlace en Chrome del móvil.
+  2. Menú ⋮ → "Instalar app" (o "Agregar a pantalla principal").
+  3. Queda con su ícono de llave y abre a pantalla completa, como cualquier app.
+
+PASO 3 (opcional) — Sacar un APK de verdad
+  1. Entra a https://www.pwabuilder.com
+  2. Pega tu enlace de Netlify y pulsa "Start".
+  3. Elige "Package for stores" → Android → "Download package".
+  4. En el ZIP que descarga está el archivo .apk.
+  5. Pásalo al móvil e instálalo (Android te pedirá permitir
+     "instalar apps de fuentes desconocidas" para Chrome o tu gestor de archivos).
+
+PRIMER USO
+  1. Ve a "Perfil" y revisa tus llaves. Vienen precargadas con lo que
+     ya sé de ti, pero corrige sobre todo: nivel de inglés, años de
+     experiencia y cuentas que ya tienes. Si marcas algo que no tienes,
+     el índice te miente.
+  2. Busca en "Buscar". En inglés hay muchas más ofertas remotas
+     (prueba: python, chatbot, customer support spanish, ai trainer).
+  3. Mira "Llaves": te dice qué llave aprender primero para desbloquear
+     más ofertas.
+
+QUÉ BUSCA EN VIVO
+  Remotive, Jobicy, Remote OK, Himalayas, Arbeitnow y Freelancer
+  (estas fuentes tienen API pública). Workana, Upwork, LinkedIn,
+  Computrabajo, Indeed y Fiverr no dejan que otras apps lean sus
+  ofertas: la app te abre su buscador con tu búsqueda ya escrita.
+
+NOTAS
+  - Cada búsqueda se guarda 1 hora para no saturar las fuentes.
+  - Si una fuente no responde, aparece "sin respuesta" y las demás
+    siguen funcionando.
+  - Tus datos quedan solo en tu móvil.
+  - Un trabajo real te paga; nunca te pide pagar para empezar.
